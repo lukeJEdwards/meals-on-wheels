@@ -1,0 +1,67 @@
+@import '~styles/colours';
+
+$spaceamounts: (1, 2, 3, 4, 5);
+
+@each $space in $spaceamounts {
+  .m-#{$space} {
+    margin: #{$space}rem;
+  }
+  .my-#{$space} {
+    margin: #{$space}rem 0;
+  }
+  .mx-#{$space} {
+    margin: 0 #{$space}rem;
+  }
+  .p-#{$space} {
+    padding: #{$space}rem;
+  }
+  .py-#{$space} {
+    padding: #{$space}rem 0;
+  }
+  .px-#{$space} {
+    padding: 0 #{$space}rem;
+  }
+}
+
+.flex-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.cols {
+  flex-direction: column;
+}
+.container {
+  display: inline-block;
+}
+
+.background {
+  display: flex;
+  flex-direction: column;
+  background-color: $primary;
+  color: $text;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.input {
+  background-color: transparent;
+  border-radius: 25px;
+  height: 40px;
+  color: $text;
+  text-indent: 10px;
+}
+.input::placeholder {
+  color: transparentize($text, 0.8);
+}
+.btn {
+  border-radius: 25px;
+  height: 40px;
+  background-color: transparent;
+  color: $text;
+}
+.btn:hover {
+  cursor: pointer;
+}
