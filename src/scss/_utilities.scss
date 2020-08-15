@@ -12,6 +12,9 @@ $spaceamounts: (1, 2, 3, 4, 5);
   .mx-#{$space} {
     margin: 0 #{$space}rem;
   }
+  .mt-#{$space} {
+    margin-top: #{$space}rem;
+  }
   .p-#{$space} {
     padding: #{$space}rem;
   }
@@ -54,7 +57,7 @@ $spaceamounts: (1, 2, 3, 4, 5);
   text-indent: 10px;
 }
 .input::placeholder {
-  color: transparentize($text, 0.8);
+  color: transparentize($text, 0.2);
 }
 .btn {
   border-radius: 25px;

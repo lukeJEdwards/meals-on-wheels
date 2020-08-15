@@ -3,3 +3,9 @@
   -moz-transition: all 0.75s ease;
   transition: all 0.75s ease;
 }
+
+@mixin transform($property) {
+  -webkit-transform: $property;
+  -moz-transform: $property;
+  transform: $property;
+}
