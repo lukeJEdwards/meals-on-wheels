@@ -10,7 +10,10 @@ import {
   faTimes,
   faMinus,
   faSearch,
-  faChevronLeft
+  faChevronLeft,
+  faUserEdit,
+  faSync,
+  faSave
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -22,7 +25,10 @@ library.add(
   faMinus,
   faSearch,
   faChevronLeft,
-  faArrowAltCircleLeft
+  faArrowAltCircleLeft,
+  faUserEdit,
+  faSync,
+  faSave
 );
 
 Vue.component('fa-icon', FontAwesomeIcon);
