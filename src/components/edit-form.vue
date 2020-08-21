@@ -92,14 +92,13 @@
 
 <script>
 import { cloneDeep, isEqual } from 'lodash';
-import ButtonAndIcon from './button-&-Icon';
 export default {
   name: 'EditForm',
   props: {
     client: { type: Object, required: true }
   },
   components: {
-    ButtonAndIcon
+    ButtonAndIcon: () => import('./button-&-Icon')
   },
   data() {
     return {

@@ -91,11 +91,10 @@
 </template>
 
 <script>
-import ButtonAndIcon from './button-&-Icon';
 export default {
   name: 'AddForm',
   components: {
-    ButtonAndIcon
+    ButtonAndIcon: () => import('./button-&-Icon')
   },
   data() {
     return {
@@ -319,10 +318,10 @@ export default {
     width: 100%;
   }
   .btn {
-    border: 1px solid $green;
+    border: 1px solid $yellow;
     border-radius: 15px;
     &:hover {
-      background-color: $green;
+      background-color: $yellow;
     }
   }
 }
@@ -339,11 +338,11 @@ export default {
   position: absolute;
   right: 1rem;
   top: 1rem;
-  border: 1px solid $green;
+  border: 1px solid $yellow;
   border-radius: 15px;
   &:hover {
     cursor: pointer;
-    background-color: $green;
+    background-color: $yellow;
   }
 }
 .discard {

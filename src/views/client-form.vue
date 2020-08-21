@@ -106,23 +106,16 @@
 </template>
 
 <script>
-import SignOutButton from '../components/sign-out-button';
-import BackButton from '../components/back-button';
-import SearchBar from '../components/search-bar';
-import EditForm from '../components/edit-form';
-import DeleteForm from '../components/delete-form';
-import ButtonAndIcon from '../components/button-&-Icon';
-import AddForm from '../components/add-form';
 export default {
   name: 'ClientForm',
   components: {
-    SignOutButton,
-    BackButton,
-    SearchBar,
-    EditForm,
-    ButtonAndIcon,
-    DeleteForm,
-    AddForm
+    SignOutButton: () => import('../components/sign-out-button'),
+    BackButton: () => import('../components/back-button'),
+    SearchBar: () => import('../components/search-bar'),
+    EditForm: () => import('../components/edit-form'),
+    ButtonAndIcon: () => import('../components/button-&-Icon'),
+    DeleteForm: () => import('../components/delete-form'),
+    AddForm: () => import('../components/add-form')
   },
   data() {
     return {
@@ -378,7 +371,6 @@ export default {
 }
 .clitent-buttons {
   width: 90vw;
-  justify-content: flex-start;
   margin-left: 5vw;
   .btn {
     font-size: 1rem;

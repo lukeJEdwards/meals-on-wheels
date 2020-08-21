@@ -7,10 +7,12 @@ $spaceamounts: (1, 2, 3, 4, 5);
     margin: #{$space}rem;
   }
   .my-#{$space} {
-    margin: #{$space}rem 0;
+    margin-top: #{$space}rem;
+    margin-bottom: #{$space}rem;
   }
   .mx-#{$space} {
-    margin: 0 #{$space}rem;
+    margin-left: #{$space}rem;
+    margin-right: #{$space}rem;
   }
   .mt-#{$space} {
     margin-top: #{$space}rem;
@@ -19,10 +21,12 @@ $spaceamounts: (1, 2, 3, 4, 5);
     padding: #{$space}rem;
   }
   .py-#{$space} {
-    padding: #{$space}rem 0;
+    padding-top: #{$space}rem;
+    padding-bottom: #{$space}rem;
   }
   .px-#{$space} {
-    padding: 0 #{$space}rem;
+    padding-left: #{$space}rem;
+    padding-right: #{$space}rem;
   }
 }
 

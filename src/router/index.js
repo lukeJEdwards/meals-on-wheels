@@ -33,6 +33,12 @@ const routes = [
     name: 'clients',
     component: () => import('../views/client-form.vue'),
     beforeEnter: OAuth
+  },
+  {
+    path: '/meals-on-wheels',
+    name: 'meals-on-wheels',
+    component: () => import('../views/meals-on-wheels.vue'),
+    beforeEnter: OAuth
   }
 ];
 
