@@ -8,6 +8,7 @@
     <fa-icon
       :icon="[prefix, icon]"
       :id="icon"
+      :spin="spin"
       :class="{
         rotate: HoverIsRotate,
         pluse: HoverIsPulse,
@@ -22,7 +23,10 @@
       :id="icon"
       class="minus"
       v-if="isMinus"
-      :class="{ 'anti-minus-rotate': MinusRotate, minus: isMinus }"
+      :class="{
+        'anti-minus-rotate': MinusRotate,
+        minus: isMinus
+      }"
     />
 
     <p><slot></slot></p>
@@ -37,7 +41,8 @@ export default {
     icon: { type: String, required: true },
     rotateOnHover: { type: Boolean, required: false, default: false },
     pulseOnHover: { type: Boolean, required: false, default: false },
-    transition: { type: Boolean, required: false, default: true }
+    transition: { type: Boolean, required: false, default: true },
+    spin: { type: Boolean, required: false, default: false }
   },
   data() {
     return {

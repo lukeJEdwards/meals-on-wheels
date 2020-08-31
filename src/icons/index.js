@@ -13,7 +13,12 @@ import {
   faChevronLeft,
   faUserEdit,
   faSync,
-  faSave
+  faSave,
+  faCopy,
+  faPaste,
+  faChevronDown,
+  faCloudUploadAlt,
+  faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -28,7 +33,12 @@ library.add(
   faArrowAltCircleLeft,
   faUserEdit,
   faSync,
-  faSave
+  faSave,
+  faCopy,
+  faPaste,
+  faChevronDown,
+  faCloudUploadAlt,
+  faSpinner
 );
 
 Vue.component('fa-icon', FontAwesomeIcon);

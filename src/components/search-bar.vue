@@ -3,9 +3,11 @@
     <input
       class="input search-input"
       type="search"
-      placeholder="Search for client"
+      placeholder="Search for
+    client"
       :value="value"
       @input="OnChange"
+      :style="{ width: this.height + 'vw' }"
     />
   </div>
 </template>
@@ -14,7 +16,8 @@
 export default {
   name: 'SearchBar',
   props: {
-    value: { type: String, required: true }
+    value: { type: String, required: true },
+    height: { type: Number, required: false, default: 30 }
   },
   methods: {
     OnChange: function(e) {
@@ -31,7 +34,6 @@ export default {
   @include transition;
   background-color: $primary;
   border: none;
-  width: 30vw;
   min-width: 200px;
 }
 </style>

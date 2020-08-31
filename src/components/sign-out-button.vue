@@ -8,11 +8,21 @@
 <script>
 export default {
   name: 'SignOutButton',
+  props: {
+    check: {
+      type: Function,
+      required: false,
+      default: () => {
+        return true;
+      }
+    }
+  },
   methods: {
     SignOut() {
-      console.log('i');
-      this.$store.commit('authentication', false);
-      this.$router.push({ name: 'login' });
+      if (this.check()) {
+        this.$store.commit('authentication', false);
+        this.$router.push({ name: 'login' });
+      }
     }
   }
 };

@@ -15,8 +15,18 @@
     <div class="info flex-container cols">
       <p class="my-1">Name</p>
       <div class="name">
-        <input type="search" class="input mx-1" v-model="client.forename" />
-        <input type="search" class="input mx-1" v-model="client.surname" />
+        <input
+          type="search"
+          class="input mx-1"
+          v-model="client.forename"
+          placeholder="forename"
+        />
+        <input
+          type="search"
+          class="input mx-1"
+          v-model="client.surname"
+          placeholder="surname"
+        />
       </div>
       <p class="my-1">Address</p>
       <div class="location">
@@ -24,11 +34,13 @@
           type="search"
           class="input mx-1 address"
           v-model="client.address"
+          placeholder="address"
         />
         <input
           type="search"
           class="input mx-1 postcode"
           v-model="client.postcode"
+          placeholder="postcode"
         />
       </div>
       <p class="my-1">Comments</p>
@@ -91,11 +103,10 @@
 </template>
 
 <script>
-import ButtonAndIcon from './button-&-Icon';
 export default {
   name: 'AddForm',
   components: {
-    ButtonAndIcon
+    ButtonAndIcon: () => import('./button-&-Icon')
   },
   data() {
     return {
@@ -103,10 +114,10 @@ export default {
       newComment: '',
       newRequirement: '',
       client: {
-        forename: 'luke',
-        surname: 'edwards',
-        address: '145 britannia ave',
-        postcode: 'TQ6 9GD',
+        forename: '',
+        surname: '',
+        address: '',
+        postcode: '',
         comments: [],
         dietaryRequirements: []
       },
@@ -187,7 +198,7 @@ export default {
           obj.dietaryRequirements = this.client.dietaryRequirements;
         }
         this.$http
-          .post('clients', obj)
+          .post('/clients', obj)
           .then(Response => {
             if ('message' in Response.data) {
               this.$parent.refresh();
@@ -319,10 +330,10 @@ export default {
     width: 100%;
   }
   .btn {
-    border: 1px solid $green;
+    border: 1px solid $yellow;
     border-radius: 15px;
     &:hover {
-      background-color: $green;
+      background-color: $yellow;
     }
   }
 }
@@ -339,11 +350,11 @@ export default {
   position: absolute;
   right: 1rem;
   top: 1rem;
-  border: 1px solid $green;
+  border: 1px solid $yellow;
   border-radius: 15px;
   &:hover {
     cursor: pointer;
-    background-color: $green;
+    background-color: $yellow;
   }
 }
 .discard {

@@ -2,8 +2,22 @@
   <div class="background">
     <SignOutButton />
     <div class="flex-container">
-      <button type="button" class="btn m-2 btn-disable">Meals on Wheel</button>
-      <button type="button" class="btn m-2 btn-disable">Delivieries</button>
+      <button
+        type="button"
+        class="btn m-2"
+        id="meals-on-wheels"
+        @click="Goto($event)"
+      >
+        Meals on Wheel
+      </button>
+      <button
+        type="button"
+        class="btn m-2"
+        id="deliveries"
+        @click="Goto($event)"
+      >
+        Delivieries
+      </button>
       <button type="button" class="btn m-2" id="clients" @click="Goto($event)">
         Clients
       </button>
@@ -12,12 +26,12 @@
 </template>
 
 <script>
-import SignOutButton from '../components/sign-out-button';
 export default {
   name: 'MainMenu',
-  components: { SignOutButton },
+  components: { SignOutButton: () => import('../components/sign-out-button') },
   methods: {
     Goto(event) {
+      console.log(event.currentTarget.id);
       this.$router.push({ name: event.currentTarget.id });
     }
   }

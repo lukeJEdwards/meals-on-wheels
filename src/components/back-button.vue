@@ -5,9 +5,20 @@
 <script>
 export default {
   name: 'BackButton',
+  props: {
+    check: {
+      type: Function,
+      required: false,
+      default: () => {
+        return true;
+      }
+    }
+  },
   methods: {
     back() {
-      this.$router.go(-1);
+      if (this.check()) {
+        this.$router.go(-1);
+      }
     }
   }
 };
