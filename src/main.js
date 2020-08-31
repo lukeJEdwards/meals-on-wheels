@@ -6,12 +6,17 @@ import VueToast from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 import './icons/index';
 import axios from 'axios';
+import VCalendar from 'v-calendar';
 
 axios.defaults.baseURL = 'http://192.168.1.140:3000/api';
 Vue.prototype.$http = axios;
 
 Vue.config.productionTip = false;
 Vue.use(VueToast);
+
+Vue.use(VCalendar, {
+  componentPrefix: 'vc'
+});
 
 Vue.directive('click-outside', {
   bind: function(el, binding, vnode) {

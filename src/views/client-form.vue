@@ -1,8 +1,18 @@
 <template>
   <div>
     <EditForm :client="currentUser" v-if="editform" />
-    <DeleteForm :client="currentUser" v-if="deleteform" />
+    <DeleteForm
+      :client="currentUser"
+      :delete="DeleteClient"
+      v-if="deleteform"
+    />
     <AddForm v-if="addform" />
+    <ContextMenu
+      :client="currentUser"
+      :edituser="EditUser"
+      :deleteuser="DeleteUser"
+      :adduser="AddUser"
+    />
     <div class="flex-container cols main" :class="{ freeze: formOpen }">
       <div class="back-buttons mx-1">
         <BackButton />
@@ -72,34 +82,34 @@
           </button>
         </div>
       </div>
-      <div class="flex-container clitent-buttons">
-        <ButtonAndIcon
+      <div class="buttons">
+        <ButtonIcon
           prefix="fas"
           icon="plus"
           :rotate-on-hover="true"
-          class="m-1 btn add-btn"
+          class="add-btn btn"
           @click.native="AddUser()"
         >
-          Add Clinet
-        </ButtonAndIcon>
-        <ButtonAndIcon
+          Add Client
+        </ButtonIcon>
+        <ButtonIcon
           prefix="fas"
           icon="user-edit"
           :pulse-on-hover="true"
-          class="m-1 btn edit-btn"
-          @click.native="openEditForm()"
+          class="edit-btn btn"
+          @click.native="EditUser()"
         >
-          Edit Client
-        </ButtonAndIcon>
-        <ButtonAndIcon
+          edit Client
+        </ButtonIcon>
+        <ButtonIcon
           prefix="fas"
           icon="minus"
           :rotate-on-hover="true"
-          class="m-1 btn delete-btn"
+          class="delete-btn btn"
           @click.native="DeleteUser()"
         >
-          Delete Client
-        </ButtonAndIcon>
+          delete Client
+        </ButtonIcon>
       </div>
     </div>
   </div>
@@ -113,9 +123,10 @@ export default {
     BackButton: () => import('../components/back-button'),
     SearchBar: () => import('../components/search-bar'),
     EditForm: () => import('../components/edit-form'),
-    ButtonAndIcon: () => import('../components/button-&-Icon'),
     DeleteForm: () => import('../components/delete-form'),
-    AddForm: () => import('../components/add-form')
+    AddForm: () => import('../components/add-form'),
+    ContextMenu: () => import('../components/context-menu'),
+    ButtonIcon: () => import('../components/button-&-Icon')
   },
   data() {
     return {
@@ -229,7 +240,7 @@ export default {
         dismissible: dis
       });
     },
-    openEditForm() {
+    EditUser() {
       if (Object.keys(this.currentUser).length > 0) {
         this.$store.commit('formStatus', { active: true, type: 'edit' });
       } else {
@@ -263,6 +274,22 @@ export default {
     },
     ResizeHandler(e) {
       this.windowWidth = e.target.innerWidth;
+    },
+    DeleteClient() {
+      this.$http
+        .delete('clients/', { data: { id: this.currentUser.id } })
+        .then(Response => {
+          console.log(Response);
+          if ('message' in Response.data) {
+            this.refresh();
+            this.currentUser = {};
+          } else {
+            this.SendNotification(Response.data, 'warning', 3000);
+          }
+        })
+        .catch(e => {
+          this.SendNotification(e, 'warning', 10000);
+        });
     }
   },
   created() {
@@ -402,6 +429,28 @@ export default {
     margin-bottom: 1rem;
     border-radius: 25px;
     background-color: $secondary;
+  }
+}
+.buttons {
+  @include transition;
+  display: flex;
+  margin-left: 5vw;
+  margin-top: 1rem;
+  .btn {
+    font-size: 1.25rem;
+    margin-right: 1rem;
+  }
+  .add-btn {
+    background-color: $green;
+    border: 1px solid $green;
+  }
+  .edit-btn {
+    background-color: $orange;
+    border: 1px solid $orange;
+  }
+  .delete-btn {
+    background-color: $red;
+    border: 1px solid $red;
   }
 }
 </style>

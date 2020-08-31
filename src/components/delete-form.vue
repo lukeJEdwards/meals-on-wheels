@@ -1,15 +1,15 @@
 <template>
   <div class="flex-container cols delete-form" :class="{ close: close }">
     <div class="m-1">
+      <p>would you like to <b>delete</b></p>
       <p>
-        would you like to delete
+        <b>{{ client.forename }} {{ client.surname }}</b>
       </p>
-      <p>{{ client.forename }} {{ client.surname }}</p>
       <p>as a client</p>
     </div>
     <div class="flex-container buttons">
-      <button type="button" class="btn px-2" @click="yes()">Yes</button>
-      <button type="button" class="btn px-2" @click="no()">No</button>
+      <button type="button" class="btn px-2 yes" @click="yes()">Yes</button>
+      <button type="button" class="btn px-2 no" @click="no()">No</button>
     </div>
   </div>
 </template>
@@ -18,7 +18,8 @@
 export default {
   name: 'DeleteForm',
   props: {
-    client: { type: Object, required: true }
+    client: { type: Object, required: true },
+    delete: { type: Function, required: true }
   },
   data() {
     return {
@@ -28,20 +29,8 @@ export default {
   },
   methods: {
     yes() {
-      this.$http
-        .delete('clients/', { data: { id: this.client.id } })
-        .then(Response => {
-          console.log(Response);
-          if ('message' in Response.data) {
-            this.no();
-            this.$parent.refresh();
-          } else {
-            this.$parent.SendNotification(Response.data, 'warning', 3000);
-          }
-        })
-        .catch(e => {
-          this.$parent.SendNotification(e, 'warning', 10000);
-        });
+      this.delete();
+      this.no();
     },
     no() {
       this.close = true;
@@ -66,13 +55,16 @@ export default {
   position: absolute;
   z-index: 1;
   color: $text;
-  background-color: $red;
+  background-color: lighten($primary, 10);
   width: 350px !important;
   margin-left: calc(50vw - 175px);
   margin-top: calc(30vh - 50px);
   border-radius: 25px;
   p {
     text-align: center;
+  }
+  b {
+    font-weight: 900;
   }
 }
 .close {
@@ -81,11 +73,13 @@ export default {
 .buttons {
   margin-bottom: 1rem;
   justify-content: space-evenly;
-  .btn {
-    border: 1px solid $orange;
-    &:hover {
-      background-color: $orange;
-    }
+  .yes {
+    border: 1px solid $green;
+    background-color: lighten($green, 10);
+  }
+  .no {
+    border: 1px solid $red;
+    background-color: $red;
   }
 }
 </style>

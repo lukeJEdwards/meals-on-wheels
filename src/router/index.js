@@ -39,6 +39,12 @@ const routes = [
     name: 'meals-on-wheels',
     component: () => import('../views/meals-on-wheels.vue'),
     beforeEnter: OAuth
+  },
+  {
+    path: '/deliveries',
+    name: 'deliveries',
+    component: () => import('../views/deliveries.vue'),
+    beforeEnter: OAuth
   }
 ];
 

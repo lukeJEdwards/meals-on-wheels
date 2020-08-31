@@ -8,7 +8,21 @@
         <BackButton />
       </div>
       <div class="add-btn" :class="{ fade: closed }">
-        <button class="btn px-4">Add new week</button>
+        <div class="picker">
+          <vc-date-picker
+            mode="range"
+            is-dark
+            class="date-picker"
+            :value="null"
+            v-model="newWeekInfo"
+            color="gray"
+            :disabled-dates="{ weekdays: [1, 7] }"
+            :popover="{ placement: 'bottom', visibility: 'click' }"
+          />
+          <button type="button" class="add" @click="AddWeekMethod()">
+            Add
+          </button>
+        </div>
       </div>
       <div class="close-btn">
         <fa-icon
@@ -18,7 +32,7 @@
           @click="Close()"
         />
       </div>
-      <div class="main">
+      <div class="main" :class="{ 'No-Weeks': weeks.length == 0 }">
         <div
           class="week px-2 py-1"
           v-for="(week, i) in weeks"
@@ -42,6 +56,9 @@
             })
           }}
         </div>
+        <div v-if="weeks.length == 0">
+          No Weeks
+        </div>
       </div>
     </div>
   </div>
@@ -57,7 +74,12 @@ export default {
     return {
       closed: true,
       weeks: [],
-      currentWeek: ''
+      currentWeek: '',
+      closeInput: true,
+      newWeekInfo: {
+        start: new Date(),
+        end: new Date()
+      }
     };
   },
   methods: {
@@ -69,18 +91,26 @@ export default {
       this.$http
         .get('/allweeks')
         .then(Response => {
-          this.weeks = Response.data.map(date => {
-            let newStartDate = date.start.split('-');
-            let newEndDate = date.end.split('-');
-            return {
-              start: new Date(
-                newStartDate[2],
-                newStartDate[1] - 1,
-                newStartDate[0]
-              ),
-              end: new Date(newEndDate[2], newEndDate[1] - 1, newEndDate[0])
-            };
-          });
+          console.log(Response);
+          this.weeks =
+            Response.data.length > 0
+              ? Response.data.map(date => {
+                  let newStartDate = date.start.split('-');
+                  let newEndDate = date.end.split('-');
+                  return {
+                    start: new Date(
+                      newStartDate[2],
+                      newStartDate[1] - 1,
+                      newStartDate[0]
+                    ),
+                    end: new Date(
+                      newEndDate[2],
+                      newEndDate[1] - 1,
+                      newEndDate[0]
+                    )
+                  };
+                })
+              : [];
           this.currentWeek = this.weeks[0];
           this.$emit('WeekChanged', this.currentWeek);
         })
@@ -97,6 +127,43 @@ export default {
     selected(id) {
       this.currentWeek = this.getWeek(id);
       this.$emit('WeekChanged', this.currentWeek);
+    },
+    AddWeekMethod() {
+      const diffTime = Math.abs(this.newWeekInfo.start - this.newWeekInfo.end);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays != 4) {
+        this.$parent.SendNotification(
+          'please chose dates sapnning 1 working week',
+          'warning',
+          3500
+        );
+        return;
+      }
+      let obj = {
+        startDate: this.newWeekInfo.start
+          .toLocaleDateString('en-GB')
+          .split('/')
+          .join('-'),
+        endDate: this.newWeekInfo.end
+          .toLocaleDateString('en-GB')
+          .split('/')
+          .join('-'),
+        data: []
+      };
+      this.$http
+        .post('/weeks', obj)
+        .then(Response => {
+          if ('complete' in Response.data) {
+            this.$parent.SendNotification('week created', 'success', 3500);
+            this.getWeeks();
+          } else {
+            this.$parent.SendNotification(Response.data.error, 'warning', 3500);
+          }
+        })
+        .catch(e => {
+          this.$parent.SendNotification(e, 'error', 3500);
+        });
     }
   },
   mounted() {
@@ -144,14 +211,21 @@ export default {
   @include transition;
   grid-area: 2 / 1 / 3 / 4;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  .btn {
-    border: 1px solid $green;
+  .add {
+    height: 38px;
+    padding: 0 2rem;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border: none;
     background-color: $green;
-    font-size: 1.25rem;
+    color: $text;
+    font-weight: 700;
     &:hover {
-      border: 1px solid lighten($green, 10);
+      cursor: pointer;
+      background-color: lighten($green, 5);
     }
   }
 }
@@ -208,5 +282,15 @@ export default {
     background: $orange;
     border: 1px solid $orange;
   }
+}
+.picker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.No-Weeks {
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
 }
 </style>

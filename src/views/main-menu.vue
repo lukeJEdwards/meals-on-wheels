@@ -12,8 +12,8 @@
       </button>
       <button
         type="button"
-        class="btn m-2 btn-disable"
-        id="delivieries"
+        class="btn m-2"
+        id="deliveries"
         @click="Goto($event)"
       >
         Delivieries

@@ -1,15 +1,39 @@
 <template>
   <div class="main">
-    <!-- <AddForm /> -->
+    <AddForm v-if="addform" @add-client="AddClient" ref="addClient" />
+    <DeleteForm v-if="deleteform" :client="selected" :delete="DeleteClient" />
+    <EditForm v-if="editform" :client="selected" />
+    <ContextMenu
+      :client="selected"
+      :edituser="ShowEditForm"
+      :deleteuser="ShowDeleteForm"
+      :adduser="ShowAddForm"
+    />
     <div :class="{ sidebar: sidebarClosed }">
       <Sidebar @WeekChanged="WeekHandler" @close="sidebarHandler" />
     </div>
-    <div class="parent" :class="{ grow: sidebarClosed }">
+    <div class="parent" :class="{ grow: sidebarClosed, freeze: formOpen }">
       <div class="top">
         <div class="bar">
-          <BackButton v-if="sidebarClosed" />
-          <SignOutButton class="sign-out" />
+          <BackButton v-if="sidebarClosed" :check="CheckSave" />
+          <SignOutButton class="sign-out" :check="CheckSave" />
+          <fa-icon
+            :icon="['fas', 'sync']"
+            class="refresh-icon"
+            :class="{ spin: refresh }"
+            @click="refreshMethod()"
+          />
         </div>
+        <ButtonIcon
+          :icon="saveicon"
+          prefix="fas"
+          :pulse-on-hover="true"
+          :spin="spin"
+          class="btn save-btn"
+          @click.native="Save()"
+        >
+          Save
+        </ButtonIcon>
         <SearchBar :value="filter" @update="filterUpdate" class="search" />
       </div>
       <div class="title">
@@ -26,12 +50,12 @@
           <div class="day">Fri</div>
         </div>
       </div>
-      <div class="clients">
+      <div class="clients" id="clients">
         <div
           class="client"
           v-for="(client, i) in clientsFilter"
           :key="i"
-          :id="i"
+          :id="client.id"
           :class="{ selected: IsSelected(client.id) }"
           @click="Selected(client.id)"
         >
@@ -55,43 +79,53 @@
           </div>
         </div>
       </div>
-      <div class="Buttons" :class="{ 'move-middle': sidebarClosed }">
+      <div class="buttons" :class="{ move: !sidebarClosed }">
         <ButtonIcon
           prefix="fas"
           icon="plus"
           :rotate-on-hover="true"
-          class="my-1 btn add-btn"
-          >Add client</ButtonIcon
+          class="add-btn btn"
+          @click.native="ShowAddForm()"
         >
+          Add Client
+        </ButtonIcon>
         <ButtonIcon
           prefix="fas"
           icon="user-edit"
           :pulse-on-hover="true"
-          class="my-1 btn save-btn"
-          >Edit client</ButtonIcon
+          class="edit-btn btn"
+          @click.native="ShowEditForm()"
         >
+          edit Client
+        </ButtonIcon>
         <ButtonIcon
           prefix="fas"
           icon="minus"
           :rotate-on-hover="true"
-          class="my-1 btn delete-btn"
-          >Remove client</ButtonIcon
+          class="delete-btn btn"
+          @click.native="ShowDeleteForm()"
         >
+          delete Client
+        </ButtonIcon>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { cloneDeep, isEqual } from 'lodash';
 export default {
   name: 'MealsOnWheels',
   components: {
     Sidebar: () => import('../components/side-bar'),
-    ButtonIcon: () => import('../components/button-&-Icon'),
     SignOutButton: () => import('../components/sign-out-button'),
     BackButton: () => import('../components/back-button'),
-    SearchBar: () => import('../components/search-bar')
-    // AddForm: () => import('../components/add-client-week')
+    SearchBar: () => import('../components/search-bar'),
+    ContextMenu: () => import('../components/context-menu'),
+    AddForm: () => import('../components/add-client-week'),
+    DeleteForm: () => import('../components/delete-form'),
+    EditForm: () => import('../components/edit-form-week'),
+    ButtonIcon: () => import('../components/button-&-Icon')
   },
   data() {
     return {
@@ -100,11 +134,14 @@ export default {
       clients: [],
       options: ['main', 'veg', 'soup', 'pudding'],
       selected: {},
-      filter: ''
+      filter: '',
+      refresh: false,
+      cache: {},
+      saveicon: 'cloud-upload-alt'
     };
   },
   computed: {
-    clientsFilter: function() {
+    clientsFilter() {
       return this.filter.length == 0
         ? this.clients
         : this.clients.filter(
@@ -112,24 +149,51 @@ export default {
               client.forename.toLowerCase().includes(this.filter) ||
               client.surname.toLowerCase().includes(this.filter)
           );
+    },
+    addform() {
+      let obj = this.$store.state.formStatus;
+      return obj.active && obj.type == 'add';
+    },
+    deleteform() {
+      let obj = this.$store.state.formStatus;
+      return obj.active && obj.type == 'delete';
+    },
+    editform() {
+      let obj = this.$store.state.formStatus;
+      return obj.active && obj.type == 'edit';
+    },
+    formOpen() {
+      return this.$store.state.formStatus.active;
+    },
+    NeedToSave() {
+      return !isEqual(this.cache, this.week);
+    },
+    spin() {
+      if (this.saveicon == 'spinner') {
+        return true;
+      }
+      return false;
     }
   },
   methods: {
     WeekHandler(e) {
       // /weeks?date=
-      let date = e.start
-        .toLocaleDateString('en-GB')
-        .split('/')
-        .join('-');
-      this.$http
-        .get(`weeks?date=${date}`)
-        .then(Response => {
-          this.week = Response.data;
-          this.getClients();
-        })
-        .catch(e => {
-          this.SendNotification(e, 'error', 5000);
-        });
+      if (e != null) {
+        let date = e.start
+          .toLocaleDateString('en-GB')
+          .split('/')
+          .join('-');
+        this.$http
+          .get(`weeks?date=${date}`)
+          .then(Response => {
+            this.week = Response.data;
+            this.cache = cloneDeep(this.week);
+            this.getClients();
+          })
+          .catch(e => {
+            this.SendNotification(e, 'error', 5000);
+          });
+      }
     },
     sidebarHandler(e) {
       this.sidebarClosed = e;
@@ -146,18 +210,14 @@ export default {
     },
     getClients() {
       this.clients = [];
-      for (let i = 0; i < this.week.data.length; i++) {
-        this.$http
-          .get(`/clients/${this.week.data[i].id}`)
-          .then(Response => {
-            let client = Response.data;
-            client.days = this.week.data[i].days;
-            this.clients.push(client);
-          })
-          .catch(e => {
-            this.SendNotification(e, 'error', 5000);
-          });
-      }
+      this.week.data.forEach(client => {
+        this.$http.get(`/clients/${client.id}`).then(Response => {
+          if (!('error' in Response.data)) {
+            Response.data.days = client.days;
+            this.clients.push(Response.data);
+          }
+        });
+      });
     },
     HasMain(id, day) {
       let client = this.clients.filter(client => client.id == id)[0];
@@ -179,6 +239,120 @@ export default {
     },
     filterUpdate(e) {
       this.filter = e.value;
+    },
+    refreshMethod() {
+      this.refresh = true;
+      this.$http
+        .get(`weeks?date=${this.week.startDate}`)
+        .then(Response => {
+          this.week = Response.data;
+          this.cache = cloneDeep(this.week);
+          this.getClients();
+        })
+        .catch(e => {
+          this.SendNotification(e, 'error', 5000);
+        });
+      setTimeout(() => {
+        this.refresh = false;
+      }, 750);
+    },
+    ShowAddForm() {
+      this.$store.commit('formStatus', { active: true, type: 'add' });
+    },
+    ShowEditForm() {
+      if (Object.keys(this.selected).length > 0) {
+        this.$store.commit('formStatus', { active: true, type: 'edit' });
+      } else {
+        this.SendNotification('Please select a client', 'warning');
+      }
+    },
+    ShowDeleteForm() {
+      if (Object.keys(this.selected).length > 0) {
+        this.$store.commit('formStatus', { active: true, type: 'delete' });
+      } else {
+        this.SendNotification('Please select a client', 'warning');
+      }
+    },
+    AddClient(e) {
+      let found = false;
+      this.clients.forEach(client => {
+        if (client.id == e) {
+          this.SendNotification('Client alread added', 'warning', 3500);
+          found = true;
+        }
+      });
+      if (!found) {
+        this.$refs.addClient.close();
+        this.$http
+          .get(`/clients/${e}`)
+          .then(Response => {
+            let daysArray = [];
+            for (let i = 0; i < 5; i++) {
+              daysArray.push({ main: 0, pudding: 0, soup: 0, veg: 0 });
+            }
+            this.week.data.push({ days: daysArray, id: e });
+            let client = Response.data;
+            client.days = daysArray;
+            this.clients.push(client);
+            this.SendNotification('Client added', 'success', 3500);
+            this.Selected(e);
+            this.Save();
+            setTimeout(() => {
+              let div = document.getElementById('clients');
+              div.scrollTop = div.scrollHeight;
+            }, 10);
+          })
+          .catch(e => this.SendNotification(e, 'error', 5000));
+      }
+    },
+    DeleteClient() {
+      this.$http
+        .delete('/weeks', {
+          data: {
+            WeekStartDate: this.week.startDate,
+            ClientId: this.selected.id
+          }
+        })
+        .then(Response => {
+          if ('message' in Response.data) {
+            this.SendNotification('Client deleted from week', 'success', 3500);
+            this.refreshMethod();
+            this.selected = {};
+          } else {
+            this.SendNotification(Response.data.error, 'error', 3500);
+          }
+        })
+        .catch(e => this.SendNotification(e, 'error', 5000));
+    },
+    Save() {
+      this.saveicon = 'spinner';
+      this.$http
+        .put('/weeks', { ...this.week })
+        .then(Response => {
+          if ('complete' in Response.data) {
+            setTimeout(() => {
+              this.SendNotification('Saved!', 'success', 3500);
+              this.cache = cloneDeep(this.week);
+              this.saveicon = 'cloud-upload-alt';
+            }, 2000);
+          } else {
+            this.SendNotification(Response.data, 'warning', 3500);
+            this.saveicon = 'cloud-upload-alt';
+          }
+        })
+        .catch(e => {
+          this.SendNotification(e, 'error', 3500);
+          this.saveicon = 'cloud-upload-alt';
+        });
+    },
+    CheckSave() {
+      console.log('i');
+      if (this.NeedToSave) {
+        this.SendNotification('Please save changes', 'warning', 3500);
+        return false;
+      } else {
+        return true;
+      }
     }
   }
 };
@@ -192,6 +366,9 @@ export default {
   @include transition;
   width: 100vw;
   display: flex;
+}
+.freeze {
+  pointer-events: none;
 }
 .sidebar {
   @include transition;
@@ -224,6 +401,8 @@ export default {
   border-top-right-radius: 25px;
 }
 .clients {
+  @include transition;
+  scroll-behavior: smooth;
   display: flex;
   width: inherit;
   flex-direction: column;
@@ -239,6 +418,7 @@ export default {
     background-color: lighten($primary, 5);
   }
   .client {
+    @include transition;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -297,33 +477,6 @@ export default {
     width: 60%;
   }
 }
-.Buttons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: calc(60ch + 5rem);
-  @include transition;
-  .btn {
-    font-size: 1.25rem;
-  }
-  .add-btn {
-    border: 1px solid $green;
-    background-color: $green;
-  }
-  .delete-btn {
-    border: 1px solid $red;
-    background-color: $red;
-    margin-left: 1rem;
-  }
-  .save-btn {
-    border: 1px solid $yellow;
-    background-color: $yellow;
-    margin-left: 1rem;
-  }
-}
-.move-middle {
-  width: 100%;
-}
 .top {
   display: flex;
   width: 100%;
@@ -360,5 +513,54 @@ export default {
   align-content: center;
   margin-left: auto;
   margin-right: 2rem;
+}
+.buttons {
+  @include transition;
+  display: flex;
+  margin: 1rem 2rem;
+  justify-content: center;
+  align-items: center;
+  width: calc(100vw - 80px - 4rem);
+  .btn {
+    font-size: 1.25rem;
+    margin-right: 1rem;
+  }
+  .add-btn {
+    background-color: $green;
+    border: 1px solid $green;
+  }
+  .edit-btn {
+    background-color: $orange;
+    border: 1px solid $orange;
+  }
+  .delete-btn {
+    background-color: $red;
+    border: 1px solid $red;
+  }
+}
+.move {
+  width: 65ch;
+}
+.refresh-icon {
+  color: $text;
+  font-size: 1.25rem;
+  margin-left: auto;
+  margin-right: 1rem;
+  &:hover {
+    cursor: pointer;
+    color: darken($text, 10);
+  }
+}
+.spin {
+  @include transition;
+  @include transform(rotate(360deg));
+}
+.save-btn {
+  border: 1px solid $blue;
+  background-color: $blue;
+  border-radius: 15px;
+  font-size: 1.25rem;
+  height: 50px;
+  min-width: 150px;
 }
 </style>
