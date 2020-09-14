@@ -18,7 +18,8 @@ import {
   faPaste,
   faChevronDown,
   faCloudUploadAlt,
-  faSpinner
+  faSpinner,
+  faFilter
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -38,7 +39,8 @@ library.add(
   faPaste,
   faChevronDown,
   faCloudUploadAlt,
-  faSpinner
+  faSpinner,
+  faFilter
 );
 
 Vue.component('fa-icon', FontAwesomeIcon);

@@ -294,7 +294,6 @@ export default {
             let client = Response.data;
             client.days = daysArray;
             this.clients.push(client);
-            this.SendNotification('Client added', 'success', 3500);
             this.Selected(e);
             this.Save();
             setTimeout(() => {
@@ -334,7 +333,7 @@ export default {
               this.SendNotification('Saved!', 'success', 3500);
               this.cache = cloneDeep(this.week);
               this.saveicon = 'cloud-upload-alt';
-            }, 2000);
+            }, 1000);
           } else {
             this.SendNotification(Response.data, 'warning', 3500);
             this.saveicon = 'cloud-upload-alt';
@@ -346,7 +345,6 @@ export default {
         });
     },
     CheckSave() {
-      console.log('i');
       if (this.NeedToSave) {
         this.SendNotification('Please save changes', 'warning', 3500);
         return false;

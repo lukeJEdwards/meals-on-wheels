@@ -179,7 +179,6 @@ export default {
       this.$http
         .get(`clients/${this.startIndex}/${this.startIndex + 15}`)
         .then(Response => {
-          console.log(Response);
           if ('clientsdata' in Response.data) {
             Response.data.clientsdata.forEach(client =>
               this.clients.push(client)
@@ -279,7 +278,6 @@ export default {
       this.$http
         .delete('clients/', { data: { id: this.currentUser.id } })
         .then(Response => {
-          console.log(Response);
           if ('message' in Response.data) {
             this.refresh();
             this.currentUser = {};

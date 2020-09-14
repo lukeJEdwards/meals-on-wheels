@@ -4,9 +4,6 @@
       <div class="title" :class="{ fade: closed }">
         <p>Weeks</p>
       </div>
-      <div class="back-btn">
-        <BackButton />
-      </div>
       <div class="add-btn" :class="{ fade: closed }">
         <div class="picker">
           <vc-date-picker
@@ -67,9 +64,6 @@
 <script>
 export default {
   name: 'Sidebar',
-  components: {
-    BackButton: () => import('../components/back-button')
-  },
   data() {
     return {
       closed: true,
@@ -91,7 +85,6 @@ export default {
       this.$http
         .get('/allweeks')
         .then(Response => {
-          console.log(Response);
           this.weeks =
             Response.data.length > 0
               ? Response.data.map(date => {
@@ -196,7 +189,6 @@ export default {
   grid-template-columns: 1fr 4fr 1fr;
   grid-template-rows: repeat(2, 1fr) 7fr 1fr;
 }
-
 .title {
   @include transition;
   grid-area: 1 / 1 / 2 / 4;
@@ -265,6 +257,7 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
+  overflow-y: auto;
   .week {
     @include transition;
     border-top-right-radius: 25px;

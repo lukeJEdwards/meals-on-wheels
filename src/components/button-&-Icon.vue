@@ -29,7 +29,7 @@
       }"
     />
 
-    <p><slot></slot></p>
+    <div><slot></slot></div>
   </button>
 </template>
 
@@ -97,7 +97,8 @@ button {
   display: flex;
   justify-content: center;
   align-items: center;
-  p {
+  box-shadow: 3px 5px 5px 0px rgba(0, 0, 0, 0.2);
+  div {
     padding-right: 1rem;
   }
 }
