@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import { isEqual, cloneDeep } from 'lodash';
 export default {
   name: 'DeliveriersWeek',
   props: {
@@ -70,7 +71,9 @@ export default {
   data() {
     return {
       deliversClients: [],
-      clients: []
+      clients: [],
+      deliveryWeek: {},
+      cache: {}
     };
   },
   methods: {
@@ -89,14 +92,27 @@ export default {
           });
       });
     },
+    getWeek() {
+      this.$http
+        .get(`/deliveries/${this.currentWeek.startDate}`)
+        .then(Response => {
+          this.deliveryWeek = Response.data;
+          this.cache = cloneDeep(Response.data);
+          this.$emit(
+            'delivery-change',
+            this.deliveryWeek.days[this.currentDay].delivers
+          );
+        })
+        .catch(e => {
+          this.$toast.open({ message: e, type: 'error', position: 'top' });
+        });
+    },
     chunkify(a, n) {
       if (n < 2) return [a];
-
       var len = a.length,
         out = [],
         i = 0,
         size;
-
       if (len % n === 0) {
         size = Math.floor(len / n);
         while (i < len) {
@@ -108,7 +124,6 @@ export default {
           out.push(a.slice(i, (i += size)));
         }
       }
-
       return out;
     },
     PairClientDeliver() {
@@ -121,18 +136,53 @@ export default {
         this.deliversClients.push(obj);
         obj = {};
       }
+    },
+    save() {
+      this.$http
+        .put('/deliveries', { ...this.deliveryWeek })
+        .then(Response => {
+          if ('complete' in Response.data) {
+            this.$toast.open({
+              message: 'Saved!',
+              type: 'success',
+              position: 'top'
+            });
+            this.cache = cloneDeep({ ...this.deliveryWeek });
+          }
+        })
+        .catch(e => {
+          this.$toast.open({
+            message: e,
+            type: 'error',
+            position: 'top'
+          });
+        });
+    },
+    refresh() {
+      this.getClients();
+      this.getWeek();
+      this.PairClientDeliver();
+    },
+    saveCheck() {
+      return isEqual(this.cache, this.deliveryWeek);
     }
   },
   watch: {
-    currentWeek: function() {
+    currentWeek() {
       this.getClients();
+      this.getWeek();
       this.PairClientDeliver();
     },
-    delivers: function() {
+    delivers() {
+      this.deliveryWeek.days[this.currentDay].delivers = this.delivers;
       this.PairClientDeliver();
     },
     currentDay() {
       this.PairClientDeliver();
+      this.$emit(
+        'delivery-change',
+        this.deliveryWeek.days[this.currentDay].delivers
+      );
     }
   }
 };
@@ -203,7 +253,8 @@ export default {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  height: 60vh;
+  height: 0;
+  flex-grow: 1;
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
   .row {

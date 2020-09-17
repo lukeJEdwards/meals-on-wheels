@@ -19,7 +19,7 @@ export default {
     SignOutButton: () => import('../components/sign-out-button')
   },
   props: {
-    refresh: { type: Function, required: true },
+    refresh: { type: Function, required: false, default: () => {} },
     backCheck: {
       type: Function,
       required: false,

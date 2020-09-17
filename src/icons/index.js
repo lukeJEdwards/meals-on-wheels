@@ -19,7 +19,10 @@ import {
   faChevronDown,
   faCloudUploadAlt,
   faSpinner,
-  faFilter
+  faFilter,
+  faCheckCircle,
+  faPrint,
+  faFile
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -40,7 +43,10 @@ library.add(
   faChevronDown,
   faCloudUploadAlt,
   faSpinner,
-  faFilter
+  faFilter,
+  faCheckCircle,
+  faPrint,
+  faFile
 );
 
 Vue.component('fa-icon', FontAwesomeIcon);

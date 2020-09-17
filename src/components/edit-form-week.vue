@@ -1,6 +1,5 @@
 <template>
   <div class="form" :class="{ close: close }">
-    <!-- <fa-icon :icon="['fas', 'times']" class="close-icon" @click="Close()" /> -->
     <div class="title">
       <p>Weekly meals</p>
     </div>
@@ -39,7 +38,8 @@
         <ButtonIcon
           icon="minus"
           prefix="fas"
-          :rotate-on-hover="true"
+          pulse-on-hover
+          type="delete"
           class="btn close-btn"
           @click.native="Close()"
           >Close</ButtonIcon
@@ -84,7 +84,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '~styles/utilities';
+@import '~styles/colours';
 @import '~styles/mixins';
 
 .form {
@@ -96,7 +96,7 @@ export default {
   min-height: 470px;
   background-color: lighten($primary, 10);
   z-index: 1;
-  border-radius: 25px;
+  border-radius: 6px;
   top: 15vh;
   left: 25vw;
   color: $text;
@@ -139,7 +139,7 @@ export default {
     margin-top: 1rem;
     margin-bottom: 2rem;
     p {
-      border-radius: 5px;
+      border-radius: 6px;
       background-color: $primary;
       padding: 0.5rem;
     }
@@ -159,6 +159,10 @@ export default {
     margin-left: 1rem;
     text-align: center;
     text-indent: 0;
+    background-color: transparent;
+    border-radius: 6px;
+    height: 40px;
+    color: $text;
     &:hover {
       border-color: lighten($orange, 5);
     }
@@ -169,14 +173,6 @@ export default {
   justify-content: center;
   align-items: center;
   margin: 0.5rem 0;
-}
-.close-btn {
-  width: 150px;
-  border: 1px solid $red;
-  background-color: $red;
-  &:hover {
-    cursor: pointer;
-  }
 }
 @media only screen and (max-width: 1600px) {
   .form {

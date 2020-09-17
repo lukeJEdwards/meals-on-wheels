@@ -28,11 +28,11 @@
       Add client
     </div>
     <hr />
-    <div class="menu-item">
+    <div class="menu-item" @click="copy()">
       <fa-icon :icon="['fas', 'copy']" class="icon" />
       Copy
     </div>
-    <div class="menu-item">
+    <div class="menu-item" @click="paste()">
       <fa-icon :icon="['fas', 'paste']" class="icon" />
       Past
     </div>
@@ -99,6 +99,21 @@ export default {
     AddUser() {
       this.adduser();
       this.close();
+    },
+    copy() {
+      document.execCommand('copy');
+      this.close();
+    },
+    paste() {
+      let selection = window.getSelection().focusNode;
+      selection.addEventListener('paste', event => {
+        let paste = (event.clipboardData || window.clipboardData).getData(
+          'text'
+        );
+        selection.value = paste;
+        event.preventDefault();
+      });
+      this.close();
     }
   },
   created() {
@@ -127,6 +142,7 @@ hr {
   border-radius: 5px;
   .menu-item {
     padding: 1rem 0.5rem;
+    user-select: none;
     &:hover {
       cursor: pointer;
       background-color: #555;

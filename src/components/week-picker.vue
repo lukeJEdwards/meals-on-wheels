@@ -44,6 +44,9 @@ export default {
   directives: {
     dragscroll
   },
+  props: {
+    check: { type: Function, required: false, default: () => true }
+  },
   data() {
     return {
       weeks: [],
@@ -66,12 +69,14 @@ export default {
       this.interval = false;
     },
     selecteWeek(index) {
-      if (this.currentWeek == this.weeks[index]) {
-        this.currentWeek = {};
-        this.$emit('week-change', {});
-      } else {
-        this.currentWeek = this.weeks[index];
-        this.EmitWeekChange();
+      if (this.check()) {
+        if (this.currentWeek == this.weeks[index]) {
+          this.currentWeek = {};
+          this.$emit('week-change', {});
+        } else {
+          this.currentWeek = this.weeks[index];
+          this.EmitWeekChange();
+        }
       }
     },
     EmitWeekChange() {

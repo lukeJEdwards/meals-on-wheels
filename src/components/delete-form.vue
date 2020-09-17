@@ -59,7 +59,7 @@ export default {
   width: 350px !important;
   margin-left: calc(50vw - 175px);
   margin-top: calc(30vh - 50px);
-  border-radius: 25px;
+  border-radius: 6px;
   p {
     text-align: center;
   }

@@ -1,42 +1,31 @@
 <template>
-  <div class="background" :class="{ closed: closed }">
+  <div class="side-bar" :class="{ close: !open }">
     <div class="parent">
-      <div class="title" :class="{ fade: closed }">
+      <div class="title" :class="{ fade: !open }">
         <p>Weeks</p>
       </div>
-      <div class="add-btn" :class="{ fade: closed }">
-        <div class="picker">
-          <vc-date-picker
-            mode="range"
-            is-dark
-            class="date-picker"
-            :value="null"
-            v-model="newWeekInfo"
-            color="gray"
-            :disabled-dates="{ weekdays: [1, 7] }"
-            :popover="{ placement: 'bottom', visibility: 'click' }"
-          />
-          <button type="button" class="add" @click="AddWeekMethod()">
-            Add
-          </button>
-        </div>
-      </div>
-      <div class="close-btn">
-        <fa-icon
-          :icon="['fas', 'angle-double-left']"
-          class="icon"
-          :class="{ rotate: closed }"
-          @click="Close()"
+      <div class="week-pick" :class="{ fade: !open }">
+        <vc-date-picker
+          mode="range"
+          is-dark
+          class="date-picker"
+          :value="null"
+          v-model="newWeekDates"
+          color="gray"
+          :disabled-dates="{ weekdays: [1, 7] }"
+          :popover="{ placement: 'bottom', visibility: 'click' }"
         />
+        <button type="button" class="add" @click="addWeek()">
+          Add
+        </button>
       </div>
-      <div class="main" :class="{ 'No-Weeks': weeks.length == 0 }">
+      <div class="weeks" :class="{ fade: !open }">
         <div
-          class="week px-2 py-1"
+          class="week"
           v-for="(week, i) in weeks"
           :key="i"
-          :id="i"
-          @click="selected($event.currentTarget.id)"
-          :class="{ 'active-week': isActive(i), fade: closed }"
+          :class="{ active: isActive(i) }"
+          @click="makeActiveWeek(i)"
         >
           {{
             week.start.toLocaleDateString('en-GB', {
@@ -53,9 +42,17 @@
             })
           }}
         </div>
-        <div v-if="weeks.length == 0">
-          No Weeks
+        <div class="no-week" v-if="noWeek">
+          <p>No weeks found</p>
         </div>
+      </div>
+      <div class="toggle">
+        <fa-icon
+          :icon="['fas', 'angle-double-left']"
+          class="icon"
+          :class="{ rotate: !open }"
+          @click="toggle()"
+        />
       </div>
     </div>
   </div>
@@ -66,21 +63,21 @@ export default {
   name: 'Sidebar',
   data() {
     return {
-      closed: true,
-      weeks: [],
-      currentWeek: '',
-      closeInput: true,
-      newWeekInfo: {
+      newWeekDates: {
         start: new Date(),
         end: new Date()
-      }
+      },
+      weeks: [],
+      open: false,
+      activeWeek: {}
     };
   },
+  computed: {
+    noWeek() {
+      return this.weeks.length < 1;
+    }
+  },
   methods: {
-    Close() {
-      this.closed = !this.closed;
-      this.$emit('close', this.closed);
-    },
     getWeeks() {
       this.$http
         .get('/allweeks')
@@ -104,41 +101,47 @@ export default {
                   };
                 })
               : [];
-          this.currentWeek = this.weeks[0];
-          this.$emit('WeekChanged', this.currentWeek);
+          this.weeks.length > 0 ? (this.activeWeek = this.weeks[0]) : null;
+          this.$emit('week-change', this.activeWeek);
         })
         .catch(e => {
-          this.$parent.SendNotification(e, 'error', 5000);
+          this.$toast.open({ message: e, type: 'error', position: 'top' });
         });
     },
-    isActive(id) {
-      return this.weeks[id] == this.currentWeek;
+    toggle() {
+      this.open = !this.open;
+      this.$emit('sidebar-toggle', this.open);
     },
-    getWeek(id) {
-      return this.weeks[id];
+    isActive(index) {
+      return this.activeWeek == this.weeks[index];
     },
-    selected(id) {
-      this.currentWeek = this.getWeek(id);
-      this.$emit('WeekChanged', this.currentWeek);
+    makeActiveWeek(index) {
+      if (this.activeWeek == this.weeks[index]) {
+        this.activeWeek = {};
+      } else {
+        this.activeWeek = this.weeks[index];
+      }
+      this.$emit('week-change', this.activeWeek);
     },
-    AddWeekMethod() {
-      const diffTime = Math.abs(this.newWeekInfo.start - this.newWeekInfo.end);
+    addWeek() {
+      const diffTime = Math.abs(
+        this.newWeekDates.start - this.newWeekDates.end
+      );
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
       if (diffDays != 4) {
-        this.$parent.SendNotification(
-          'please chose dates sapnning 1 working week',
-          'warning',
-          3500
-        );
+        this.$toast.open({
+          message: 'please chose dates sapnning 1 working week',
+          type: 'warning',
+          position: 'top'
+        });
         return;
       }
       let obj = {
-        startDate: this.newWeekInfo.start
+        startDate: this.newWeekDates.start
           .toLocaleDateString('en-GB')
           .split('/')
           .join('-'),
-        endDate: this.newWeekInfo.end
+        endDate: this.newWeekDates.end
           .toLocaleDateString('en-GB')
           .split('/')
           .join('-'),
@@ -148,14 +151,22 @@ export default {
         .post('/weeks', obj)
         .then(Response => {
           if ('complete' in Response.data) {
-            this.$parent.SendNotification('week created', 'success', 3500);
+            this.$toast.open({
+              message: 'week created',
+              type: 'success',
+              position: 'top'
+            });
             this.getWeeks();
           } else {
-            this.$parent.SendNotification(Response.data.error, 'warning', 3500);
+            this.$toast.open({
+              message: Response.data.error,
+              type: 'warning',
+              position: 'top'
+            });
           }
         })
         .catch(e => {
-          this.$parent.SendNotification(e, 'error', 3500);
+          this.$toast.open({ message: e, type: 'error', position: 'top' });
         });
     }
   },
@@ -166,46 +177,43 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '~styles/utilities';
+@import '~styles/colours';
 @import '~styles/mixins';
-
-.background {
+.side-bar {
   @include transition;
-  width: 400px !important;
-  border-top-right-radius: 25px;
-  border-bottom-right-radius: 25px;
-}
-.closed {
-  @include transform(translateX(-80%));
-}
-.fade {
-  opacity: 0;
+  display: flex;
+  height: 100vh;
+  width: 400px;
+  background-color: $primary;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  color: $text;
 }
 .parent {
-  @include transition;
   display: grid;
-  width: 400px;
-  height: 100vh;
-  grid-template-columns: 1fr 4fr 1fr;
-  grid-template-rows: repeat(2, 1fr) 7fr 1fr;
+  width: 100%;
+  grid-template-columns: 1fr 3fr 1fr;
+  grid-template-rows: repeat(2, 1fr) 5fr 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
 }
 .title {
   @include transition;
-  grid-area: 1 / 1 / 2 / 4;
   display: flex;
-  align-items: flex-end;
   justify-content: center;
-  font-size: 2em;
-  border-bottom: 1px solid $text;
+  align-items: flex-end;
+  font-size: 2rem;
+  border-bottom: 2px solid $text;
   padding-bottom: 1rem;
+  grid-area: 1 / 1 / 2 / 4;
 }
-.add-btn {
+.week-pick {
   @include transition;
-  grid-area: 2 / 1 / 3 / 4;
+
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+  grid-area: 2 / 1 / 3 / 4;
   .add {
     height: 38px;
     padding: 0 2rem;
@@ -221,69 +229,63 @@ export default {
     }
   }
 }
-.back-btn {
-  grid-area: 1 / 1 / 2 / 2;
+.weeks {
+  @include transition;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 0.5rem;
-  padding-left: 1rem;
-  .fa-arrow-alt-circle-left {
-    font-size: 3rem;
+  flex-direction: column;
+  overflow: auto;
+  grid-area: 3 / 1 / 4 / 3;
+  .week {
+    width: 18ch;
+    font-size: 1.25rem;
+    padding: 1rem 2rem;
+    margin-bottom: 0.5rem;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    &:hover {
+      cursor: pointer;
+      background-color: $orange;
+    }
+  }
+  .active {
+    background-color: $orange;
+    &:hover {
+      background-color: $orange;
+    }
   }
 }
-.close-btn {
-  grid-area: 1 / 3 / 4 / 4;
+.toggle {
+  @include transition;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  grid-area: 1 / 3 / 5 / 4;
   .icon {
     @include transition;
     color: $orange;
     font-size: 3rem;
+    padding: 0 1rem;
     &:hover {
       cursor: pointer;
-      color: darken($orange, 20);
+      color: darken($orange, 5);
     }
   }
-  .rotate {
-    @include transform(rotateZ(180deg));
-  }
 }
-.main {
-  @include transition;
-  grid-area: 3 / 1 / 4 / 3;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  overflow-y: auto;
-  .week {
-    @include transition;
-    border-top-right-radius: 25px;
-    border-bottom-right-radius: 25px;
-    border: 1px solid rgba(#000, 0);
-    margin-bottom: 0.5rem;
-    font-size: 1.25rem;
-    &:hover {
-      cursor: pointer;
-      border: 1px solid $orange;
-      border-left: none;
-    }
-  }
-  .active-week {
-    background: $orange;
-    border: 1px solid $orange;
-  }
+.close {
+  width: 80px;
 }
-.picker {
+.fade {
+  opacity: 0;
+  overflow: hidden;
+}
+.rotate {
+  @include transform(rotateZ(180deg));
+}
+.no-week {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-.No-Weeks {
-  justify-content: center;
-  align-items: center;
-  font-size: 3rem;
+  height: 100%;
+  font-size: 1.5rem;
 }
 </style>

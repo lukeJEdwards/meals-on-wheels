@@ -33,20 +33,21 @@ export default {
       UserName: ''
     };
   },
-  watch: {
-    isAuthenticated: function() {
-      if (this.isAuthenticated) {
-        this.setUsername(this.UserName);
-        this.$router.push({ name: 'main-menu' });
-      }
-    }
-  },
   methods: {
     OAuth() {
       this.$http
         .get(`/login/${this.UserName}`)
         .then(Response => {
           this.authentication(Response.data.Oauth);
+          if (Response.data.Oauth) {
+            this.$router.push({ name: 'main-menu' });
+          } else {
+            this.$toast.open({
+              message: 'Username incorrect',
+              type: 'warning',
+              position: 'top'
+            });
+          }
         })
         .catch(e => {
           this.$toast.open({

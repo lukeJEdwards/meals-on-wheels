@@ -182,7 +182,7 @@ export default {
   min-height: 450px;
   margin-top: calc(40vh - 13.5vw);
   margin-left: 36.5vw;
-  border-radius: 25px;
+  border-radius: 6px;
   font-size: 1.5rem;
 }
 .close {
@@ -239,14 +239,14 @@ export default {
   display: flex;
   width: fill;
   background-color: $secondary;
-  border-radius: 15px;
+  border-radius: 6px;
   flex-wrap: wrap;
   .tag {
     display: flex;
     align-items: center;
     font-size: 1rem;
     background-color: $primary;
-    border-radius: 25px;
+    border-radius: 6px;
     padding: 0.5rem;
     margin: 1rem;
     text-align: center;
@@ -267,7 +267,7 @@ export default {
   }
   .btn {
     border: 1px solid $green;
-    border-radius: 15px;
+    border-radius: 6px;
     &:hover {
       background-color: $green;
     }
@@ -287,7 +287,8 @@ export default {
   right: 1rem;
   top: 1rem;
   border: 1px solid $green;
-  border-radius: 15px;
+  border-radius: 6px;
+  box-shadow: none;
   &:hover {
     cursor: pointer;
     background-color: $green;

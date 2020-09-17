@@ -1,35 +1,21 @@
 <template>
   <button
-    type="button"
-    @mouseenter="Start"
-    @mouseleave="End"
-    :class="{ 'minus-button': isMinus }"
+    class="icon-btn"
+    :class="{
+      add: type == 'add',
+      edit: type == 'edit',
+      delete: type == 'delete',
+      default: type == 'default'
+    }"
+    @mouseenter="start()"
+    @mouseleave="stop()"
   >
-    <fa-icon
-      :icon="[prefix, icon]"
-      :id="icon"
-      :spin="spin"
-      :class="{
-        rotate: HoverIsRotate,
-        pluse: HoverIsPulse,
-        'minus-rotate': MinusRotate,
-        minus: isMinus,
-        icon: !isMinus,
-        transition: transition
-      }"
-    />
-    <fa-icon
-      :icon="[prefix, icon]"
-      :id="icon"
-      class="minus"
-      v-if="isMinus"
-      :class="{
-        'anti-minus-rotate': MinusRotate,
-        minus: isMinus
-      }"
-    />
-
-    <div><slot></slot></div>
+    <div class="content">
+      <fa-icon :icon="['fas', icon]" class="icon" ref="icon" :spin="spin" />
+      <div class="text">
+        <slot></slot>
+      </div>
+    </div>
   </button>
 </template>
 
@@ -37,38 +23,26 @@
 export default {
   name: 'ButtonAndIcon',
   props: {
-    prefix: { type: String, required: true },
     icon: { type: String, required: true },
     rotateOnHover: { type: Boolean, required: false, default: false },
     pulseOnHover: { type: Boolean, required: false, default: false },
     transition: { type: Boolean, required: false, default: true },
+    type: { type: String, required: false, default: 'default' },
     spin: { type: Boolean, required: false, default: false }
   },
   data() {
     return {
-      hovered: false
+      angle: 0
     };
   },
-  computed: {
-    isMinus() {
-      return this.icon == 'minus';
-    },
-    HoverIsRotate() {
-      return this.hovered && this.rotateOnHover && !this.isMinus;
-    },
-    MinusRotate() {
-      return this.hovered && this.isMinus;
-    },
-    HoverIsPulse() {
-      return this.hovered && this.pulseOnHover;
-    }
-  },
   methods: {
-    Start() {
-      this.hovered = true;
+    start() {
+      this.rotateOnHover ? this.$refs.icon.classList.add('rotate') : null;
+      this.pulseOnHover ? this.$refs.icon.classList.add('pluse') : null;
     },
-    End() {
-      this.hovered = false;
+    stop() {
+      this.rotateOnHover ? this.$refs.icon.classList.remove('rotate') : null;
+      this.pulseOnHover ? this.$refs.icon.classList.remove('pluse') : null;
     }
   }
 };
@@ -76,45 +50,66 @@ export default {
 
 <style lang="scss" scoped>
 @import '~styles/mixins';
-.icon {
-  @include transition;
-  font-size: 1rem;
-  padding: 0.5rem 1rem;
-}
-.minus {
-  @include transition;
-  position: absolute;
-  left: 1rem;
-  font-size: 1rem;
-}
-.minus-button {
-  padding: 0.5rem 0;
-  padding-left: calc(2rem + 14px);
-  padding-right: 1rem;
-}
-button {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 3px 5px 5px 0px rgba(0, 0, 0, 0.2);
-  div {
-    padding-right: 1rem;
-  }
-}
-.transition {
-  @include transition;
-}
-.rotate {
-  @include transform(rotate(-90deg));
-}
+@import '~styles/colours';
+
+// transistion
 .pluse {
   @include transform(scale(1.25, 1.25));
 }
-.minus-rotate {
-  @include transform(rotate(45deg));
+.rotate {
+  @include transform(rotateZ(-90deg));
 }
-.anti-minus-rotate {
-  @include transform(rotate(-45deg));
+
+//formatting
+.icon-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: $text;
+  border: none;
+  font-size: 1.25rem;
+  box-shadow: 3px 5px 5px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  &:hover {
+    cursor: pointer;
+  }
+}
+.content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 1rem;
+}
+.text {
+  padding-left: 1rem;
+}
+.icon {
+  @include transition;
+}
+
+// colours
+.add {
+  background-color: $green;
+  &:hover {
+    background-color: darken($green, 5);
+  }
+}
+.edit {
+  background-color: $yellow;
+  &:hover {
+    background-color: darken($yellow, 5);
+  }
+}
+.delete {
+  background-color: $red;
+  &:hover {
+    background-color: darken($red, 5);
+  }
+}
+.default {
+  background-color: $blue;
+  &:hover {
+    background-color: darken($blue, 5);
+  }
 }
 </style>

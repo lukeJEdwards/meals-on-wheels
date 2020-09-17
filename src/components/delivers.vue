@@ -6,20 +6,20 @@
         <p>{{ deliver }}</p>
         <ButtonIcon
           v-if="!added(i)"
-          prefix="fas"
           icon="plus"
           rotate-on-hover
           class="btn add"
+          type="add"
           @click.native="add(i)"
         >
           Add
         </ButtonIcon>
         <ButtonIcon
           v-if="added(i)"
-          prefix="fas"
           icon="minus"
-          rotate-on-hover
+          pulse-on-hover
           class="btn remove"
+          type="delete"
           @click.native="remove(i)"
         >
           remove

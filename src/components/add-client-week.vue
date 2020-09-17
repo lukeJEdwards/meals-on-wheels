@@ -1,64 +1,95 @@
 <template>
-  <div class="form" :class="{ close: closed }">
-    <fa-icon :icon="['fas', 'times']" class="close-icon m-1" @click="close()" />
+  <div class="base" :class="{ close: closed }">
     <div class="title">
-      <p>Add Client</p>
+      <fa-icon :icon="['fas', 'times']" class="icon" @click="close()" />
+      Add client
     </div>
-    <SearchBar
-      class="search-bar"
-      :value="filter"
-      @update="filterUpdate"
-      :height="20"
-    />
-    <div class="info">
-      <div
-        class="client"
-        v-for="(client, i) in FilteredClients"
-        :key="i"
-        :id="i"
-      >
-        <p>{{ client.name }}</p>
-        <IconButton
-          prefix="fas"
-          icon="plus"
-          :rotate-on-hover="true"
-          :transition="true"
-          class="add-icon"
-          :id="i"
-          @click.native="addClient(client.id)"
-          >Add</IconButton
-        >
+    <Searchbar @search-value="FilterHandler" />
+    <div class="results">
+      <div class="no-results" v-if="noResults">
+        <p>no clients found</p>
+      </div>
+      <div class="no-results" v-if="noSearch">
+        <p>please search for a client</p>
+      </div>
+      <div v-if="noArray">
+        <div class="client" v-for="(client, i) in clients" :key="i">
+          <div class="name">{{ client.forename }}</div>
+          <div class="name">{{ client.surname }}</div>
+          <ButtonIcon
+            :icon="getButtonIcon(i)"
+            pulse-on-hover
+            :type="getButtonType(i)"
+            :class="{ Added: Added(i) }"
+            @click.native="AddClient(i)"
+            >{{ Added(i) ? 'Added' : 'Add' }}</ButtonIcon
+          >
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { debounce } from 'debounce';
 export default {
-  name: 'AddClientToWeek',
+  name: 'AddForm',
   components: {
-    SearchBar: () => import('../components/search-bar'),
-    IconButton: () => import('../components/button-&-Icon')
+    Searchbar: () => import('../components/search-bar'),
+    ButtonIcon: () => import('../components/button-&-Icon')
+  },
+  computed: {
+    noSearch() {
+      return this.filter == '';
+    },
+    noArray() {
+      return this.clients instanceof Array;
+    }
+  },
+  props: {
+    addedClients: { type: Array, required: false, default: () => [] }
   },
   data() {
     return {
+      clients: [],
       filter: '',
-      closed: true,
-      clients: []
+      noResults: false,
+      closed: true
     };
   },
-  computed: {
-    FilteredClients: function() {
-      return this.filter == ''
-        ? this.clients
-        : this.clients.filter(client =>
-            client.name.toLowerCase().includes(this.filter)
-          );
+  watch: {
+    filter: function() {
+      this.filter == '' ? (this.clients = []) : this.getClients();
     }
   },
   methods: {
-    filterUpdate(e) {
-      this.filter = e.value;
+    FilterHandler(value) {
+      this.filter = value;
+    },
+    getClients: debounce(function() {
+      this.$http
+        .get(`clients?filter=${this.filter.toLowerCase()}`)
+        .then(Response => {
+          this.clients = Response.data;
+          this.clients.length < 1
+            ? (this.noResults = true)
+            : (this.noResults = false);
+        })
+        .catch(e => {
+          this.$toast.open({ message: e, type: 'error', position: 'top' });
+        });
+    }, 500),
+    Added(index) {
+      return (
+        this.addedClients.filter(client => client.id == this.clients[index].id)
+          .length > 0
+      );
+    },
+    getButtonType(index) {
+      return this.Added(index) ? 'default' : 'add';
+    },
+    getButtonIcon(index) {
+      return this.Added(index) ? 'check-circle' : 'plus';
     },
     close() {
       this.closed = true;
@@ -66,23 +97,14 @@ export default {
         this.$store.commit('formStatus', { active: false, type: '' });
       }, 750);
     },
-    getClients() {
-      this.$http
-        .get('/clients')
-        .then(Response => {
-          this.clients = Response.data.data;
-        })
-        .catch(e => this.$parent.SendNotification(e, 'error', 5000));
-    },
-    addClient(id) {
-      this.$emit('add-client', id);
+    AddClient(index) {
+      this.$emit('add-client', this.clients[index]);
     }
   },
   mounted() {
     setTimeout(() => {
       this.closed = false;
     }, 10);
-    this.getClients();
   }
 };
 </script>
@@ -90,9 +112,11 @@ export default {
 <style lang="scss" scoped>
 @import '~styles/colours';
 @import '~styles/mixins';
-.form {
+.base {
   @include transition;
   position: absolute;
+  display: flex;
+  flex-direction: column;
   color: $text;
   background-color: lighten($primary, 10);
   width: 27vw;
@@ -101,70 +125,55 @@ export default {
   min-height: 450px;
   margin-top: calc(40vh - 13.5vw);
   margin-left: 36.5vw;
-  border-radius: 25px;
+  border-radius: 6px;
   font-size: 1.5rem;
-  z-index: 1;
-}
-.close {
-  @include transform(translateY(-100vh));
+  overflow: hidden;
 }
 .title {
-  text-align: center;
-  border-bottom: 2px solid $primary;
-  padding-top: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 0;
 }
-.close-icon {
+.icon {
   position: absolute;
+  left: 0;
+  top: 0;
   margin: 1rem;
   &:hover {
     cursor: pointer;
-    color: darken($text, 20);
+    color: darken($text, 10);
   }
 }
-.search-bar {
+.results {
   display: flex;
-  justify-content: center;
-  margin: 0.5rem 0;
-}
-.add-icon {
-  border: 1px solid $green;
-  background-color: $green;
-  border-radius: 25px;
-  height: 40px;
-  margin-top: 0.5rem;
-  margin-left: auto;
-  margin-right: auto;
-  color: $text;
-  &:hover {
-    cursor: pointer;
-    border: 1px solid lighten($green, 5);
-  }
-}
-.info {
-  font-size: 1.25rem;
-  height: calc(27vw - 8rem);
-  justify-content: flex-start;
+  flex-direction: column;
+  flex-shrink: 0;
+  flex-grow: 1;
   overflow-y: auto;
-  .client {
+  height: 10px;
+}
+.client {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr;
+  margin: 1rem 0.5rem;
+  div {
     display: flex;
-    margin-left: 1rem;
-    margin-top: 1rem;
     justify-content: center;
     align-items: center;
-    p {
-      width: 20ch;
-      text-align: center;
-    }
   }
 }
-
-@media only screen and (max-width: 1600px) {
-  .form {
-    margin-top: calc(40vh - 225px);
-    margin-left: calc(50vw - 225px);
-  }
-  .info {
-    height: calc(450px - 8rem);
-  }
+.no-results {
+  display: flex;
+  justify-content: center;
+  margin: auto 0;
+  align-items: center;
+}
+.Added {
+  pointer-events: none;
+}
+.close {
+  @include transform(translateY(-100vh));
 }
 </style>

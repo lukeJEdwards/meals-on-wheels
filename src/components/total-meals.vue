@@ -1,33 +1,23 @@
 <template>
   <div class="base">
-    <div class="sections">
-      <div class="section">
-        <div class="title">Weekly meals</div>
-        <div class="info">
-          <div class="row">
-            <div class="option">main: {{ getTotalWeeklyOption('main') }}</div>
-            <div class="option">veg: {{ getTotalWeeklyOption('veg') }}</div>
-          </div>
-          <div class="row">
-            <div class="option">soup:{{ getTotalWeeklyOption('soup') }}</div>
-            <div class="option">
-              pudding: {{ getTotalWeeklyOption('pudding') }}
-            </div>
+    <div>
+      <div class="titles">
+        <div class="section">Weekly meals</div>
+        <div class="section">Daliy meals</div>
+      </div>
+      <div class="info">
+        <div class="section">
+          <div class="option" v-for="(option, i) in options" :key="i">
+            {{ option[0].toUpperCase() }}: {{ getTotalWeeklyOption(option) }}
           </div>
         </div>
-      </div>
-      <div class="section">
-        <div class="title">Daily meals</div>
-        <div class="info">
-          <div class="row">
-            <div class="option">main: {{ getTotalDailyOption('main') }}</div>
-            <div class="option">veg: {{ getTotalDailyOption('veg') }}</div>
-          </div>
-          <div class="row">
-            <div class="option">soup:{{ getTotalDailyOption('soup') }}</div>
-            <div class="option">
-              pudding: {{ getTotalDailyOption('pudding') }}
-            </div>
+        <div class="section">
+          <div
+            class="option"
+            v-for="(option, i) in options"
+            :key="options.length + i"
+          >
+            {{ option[0].toUpperCase() }}: {{ getTotalDailyOption(option) }}
           </div>
         </div>
       </div>
@@ -51,6 +41,13 @@ export default {
       required: false,
       default: () => 0
     }
+  },
+  data() {
+    return {
+      options: ['main', 'veg', 'soup', 'pudding'],
+      windowHeight: window.innerHeight,
+      windowWidth: window.innerWidth
+    };
   },
   methods: {
     getTotalWeeklyOption(option) {
@@ -76,7 +73,17 @@ export default {
     },
     HaveWeekData() {
       return Object.keys(this.currentWeek).length > 0;
+    },
+    resizeHander(e) {
+      this.windowHeight = e.currentTarget.innerHeight;
+      this.windowWidth = e.currentTarget.innerWidth;
     }
+  },
+  mounted() {
+    window.addEventListener('resize', this.resizeHander);
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.resizeHander);
   }
 };
 </script>
@@ -98,44 +105,32 @@ export default {
 .title {
   display: flex;
   justify-content: center;
-  margin: 1rem 0;
-  font-size: 1.5rem;
-}
-.sections {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
   align-items: center;
+  font-size: 1.25rem;
+  padding: 0.5rem 0;
+}
+.titles {
+  display: flex;
+  font-size: 1.25rem;
+  padding: 0.25rem 0;
 }
 .section {
   display: flex;
-  flex-direction: column;
+  width: 50%;
   justify-content: center;
-  margin-bottom: 1rem;
-  .title {
-    font-size: 1.25rem;
-    margin: 0.5rem 0;
-  }
-  .info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-  .row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+  align-items: center;
+  flex-wrap: wrap;
+}
+.info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
   .option {
     display: flex;
-    min-width: 10ch;
-    margin: 0.5rem;
-    padding: 0.5rem;
-    width: 25%;
-    justify-content: center;
-    align-items: center;
     background-color: darken($primary, 5);
+    padding: 0.25rem 0.5rem;
+    margin: 0.5rem;
     border-radius: 6px;
   }
 }
