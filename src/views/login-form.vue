@@ -1,7 +1,7 @@
 <template>
   <div class="background">
     <div class="container">
-      <form @:submit.prevent>
+      <div class="form">
         <h1>Login</h1>
         <input
           type="search"
@@ -9,16 +9,25 @@
           placeholder="Username"
           v-model="UserName"
           @keydown.enter="OAuth()"
+          ref="username"
+          @:submit.prevent="onSubmit"
         />
-        <button type="button" class="btn" @click="OAuth()">Login</button>
-      </form>
+        <button type="button" class="btn" @click="OAuth()">
+          Login
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
+import { mapMutations } from 'vuex';
 export default {
   name: 'Login',
+  computed: {
+    ...mapState(['isAuthenticated'])
+  },
   data() {
     return {
       UserName: ''
@@ -26,12 +35,30 @@ export default {
   },
   methods: {
     OAuth() {
-      if (this.UserName.toLowerCase() == 'admin') {
-        this.$store.commit('authentication', true);
-        this.UserName = '';
-        this.$router.push({ name: 'main-menu' });
-      }
-    }
+      this.$http
+        .get(`/login/${this.UserName}`)
+        .then(Response => {
+          this.authentication(Response.data.Oauth);
+          if (Response.data.Oauth) {
+            this.$router.push({ name: 'main-menu' });
+          } else {
+            this.$toast.open({
+              message: 'Username incorrect',
+              type: 'warning',
+              position: 'top'
+            });
+          }
+        })
+        .catch(e => {
+          this.$toast.open({
+            message: e,
+            type: 'error',
+            position: 'top'
+          });
+        });
+    },
+    ...mapMutations(['authentication', 'setUsername']),
+    onSubmit() {}
   }
 };
 </script>
@@ -45,7 +72,7 @@ export default {
   margin-top: 30vh;
 }
 
-form {
+.form {
   display: flex;
   flex-direction: column;
   align-items: center;

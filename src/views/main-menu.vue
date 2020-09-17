@@ -31,7 +31,6 @@ export default {
   components: { SignOutButton: () => import('../components/sign-out-button') },
   methods: {
     Goto(event) {
-      console.log(event.currentTarget.id);
       this.$router.push({ name: event.currentTarget.id });
     }
   }

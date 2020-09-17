@@ -55,7 +55,7 @@ $spaceamounts: (1, 2, 3, 4, 5);
 
 .input {
   background-color: transparent;
-  border-radius: 25px;
+  border-radius: 6px;
   height: 40px;
   color: $text;
   text-indent: 10px;
@@ -64,7 +64,7 @@ $spaceamounts: (1, 2, 3, 4, 5);
   color: transparentize($text, 0.2);
 }
 .btn {
-  border-radius: 25px;
+  border-radius: 6px;
   height: 40px;
   background-color: transparent;
   color: $text;

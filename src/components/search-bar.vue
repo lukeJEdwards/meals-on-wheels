@@ -1,13 +1,10 @@
 <template>
-  <div>
+  <div class="search-input">
     <input
-      class="input search-input"
       type="search"
-      placeholder="Search for
-    client"
-      :value="value"
-      @input="OnChange"
-      :style="{ width: this.height + 'vw' }"
+      v-model="value"
+      :placeholder="placeHolderText"
+      class="input"
     />
   </div>
 </template>
@@ -16,24 +13,42 @@
 export default {
   name: 'SearchBar',
   props: {
-    value: { type: String, required: true },
-    height: { type: Number, required: false, default: 30 }
+    placeHolderText: {
+      type: String,
+      required: false,
+      default: 'Search...'
+    }
   },
-  methods: {
-    OnChange: function(e) {
-      this.$emit('update', e.target);
+  data() {
+    return {
+      value: ''
+    };
+  },
+  watch: {
+    value: function() {
+      this.$emit('search-value', this.value);
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-@import '~styles/utilities';
-@import '~styles/mixins';
+@import '~styles/colours';
 .search-input {
-  @include transition;
   background-color: $primary;
-  border: none;
-  min-width: 200px;
+  border: 1px solid darken($primary, 5);
+  padding: 0.5rem 0;
+  .input {
+    color: $text;
+    background-color: $primary;
+    border: none;
+    width: 100%;
+    font-size: 1.25rem;
+    padding: 0.5rem 0;
+    text-indent: 10px;
+  }
+  .input::placeholder {
+    color: darken($text, 10);
+  }
 }
 </style>
