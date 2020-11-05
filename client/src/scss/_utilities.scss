@@ -1,0 +1,74 @@
+@import '~styles/colours';
+
+$spaceamounts: (1, 2, 3, 4, 5);
+
+@each $space in $spaceamounts {
+  .m-#{$space} {
+    margin: #{$space}rem;
+  }
+  .my-#{$space} {
+    margin-top: #{$space}rem;
+    margin-bottom: #{$space}rem;
+  }
+  .mx-#{$space} {
+    margin-left: #{$space}rem;
+    margin-right: #{$space}rem;
+  }
+  .mt-#{$space} {
+    margin-top: #{$space}rem;
+  }
+  .p-#{$space} {
+    padding: #{$space}rem;
+  }
+  .py-#{$space} {
+    padding-top: #{$space}rem;
+    padding-bottom: #{$space}rem;
+  }
+  .px-#{$space} {
+    padding-left: #{$space}rem;
+    padding-right: #{$space}rem;
+  }
+}
+
+.flex-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.cols {
+  flex-direction: column;
+}
+.container {
+  display: inline-block;
+}
+
+.background {
+  display: flex;
+  flex-direction: column;
+  background-color: $primary;
+  color: $text;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.input {
+  background-color: transparent;
+  border-radius: 6px;
+  height: 40px;
+  color: $text;
+  text-indent: 10px;
+}
+.input::placeholder {
+  color: transparentize($text, 0.2);
+}
+.btn {
+  border-radius: 6px;
+  height: 40px;
+  background-color: transparent;
+  color: $text;
+}
+.btn:hover {
+  cursor: pointer;
+}

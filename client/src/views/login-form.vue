@@ -1,0 +1,91 @@
+<template>
+  <div class="background">
+    <div class="container">
+      <form class="form" @submit.prevent="onSubmit">
+        <h1>Login</h1>
+        <input
+          type="search"
+          class="input m-2"
+          placeholder="Username"
+          v-model="UserName"
+          @keydown.enter="OAuth()"
+          ref="username"
+        />
+        <button type="button" class="btn" @click="OAuth()">
+          Login
+        </button>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script>
+import { mapState } from 'vuex';
+import { mapMutations } from 'vuex';
+export default {
+  name: 'Login',
+  computed: {
+    ...mapState(['isAuthenticated'])
+  },
+  data() {
+    return {
+      UserName: ''
+    };
+  },
+  methods: {
+    OAuth() {
+      this.$http
+        .get(`/users/${this.UserName}`)
+        .then(Response => {
+          this.authentication(Response.data.Oauth);
+          if (Response.data.Oauth) {
+            this.$router.push({ name: 'main-menu' });
+          } else {
+            this.$toast.open({
+              message: 'Username incorrect',
+              type: 'warning',
+              position: 'top'
+            });
+          }
+        })
+        .catch(e => {
+          this.$toast.open({
+            message: e,
+            type: 'error',
+            position: 'top'
+          });
+        });
+    },
+    ...mapMutations(['authentication', 'setUsername']),
+    onSubmit() {}
+  }
+};
+</script>
+
+<style lang="scss" scoped>
+@import '~styles/utilities';
+
+.container {
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 30vh;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  input {
+    border: 1px solid $green;
+    width: 350px;
+    text-align: center;
+  }
+  button {
+    width: 250px;
+    border: 1px solid $orange;
+  }
+  button:hover {
+    background-color: $orange;
+  }
+}
+</style>
