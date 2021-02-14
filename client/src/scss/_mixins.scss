@@ -1,0 +1,15 @@
+@mixin darken-hover($colour) {
+  &:hover {
+    cursor: pointer;
+    background-color: darken($colour, 5);
+  }
+}
+
+@mixin border-hover($colour, $pointer: false) {
+  &:hover {
+    @if $pointer {
+      cursor: pointer;
+    }
+    border: 1px solid $colour;
+  }
+}
